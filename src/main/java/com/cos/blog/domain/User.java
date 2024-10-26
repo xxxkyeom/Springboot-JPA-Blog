@@ -3,10 +3,13 @@ package com.cos.blog.domain;
 import com.cos.blog.domain.Base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
@@ -24,7 +27,9 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String email; // 이메일
 
-    @ColumnDefault("'USER'")
     @Enumerated(EnumType.STRING)
-    private Role role; // 열거형 타입으로 설정하여 고르기
+    private Role role = Role.USER; // 열거형 타입으로 설정하여 고르기
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Board> boards = new ArrayList<Board>();
 }
