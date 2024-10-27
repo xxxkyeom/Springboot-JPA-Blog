@@ -3,13 +3,12 @@ package com.cos.blog.test;
 import com.cos.blog.domain.User;
 import com.cos.blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,4 +56,15 @@ public class DummyControllerTest {
     // @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
 
     // Page<User> page = userRepository.findAll(PageRequest.of(1, 10, Sort.by("id").descending()));
+
+    @Transactional
+    @PutMapping("/dummy/user/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable int id, @RequestBody User user) {
+        User findUser = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("not exist user"));
+        findUser.setPassword(user.getPassword());
+        findUser.setEmail(user.getEmail());
+
+        // save 호출하지 않고 더티 체킹, 영속성 컨텍스트에 의해 자동 update 쿼리 실행
+        return ResponseEntity.ok().body(findUser);
+    }
 }
