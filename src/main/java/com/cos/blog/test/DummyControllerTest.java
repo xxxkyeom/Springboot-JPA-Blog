@@ -1,13 +1,18 @@
 package com.cos.blog.test;
 
-import com.cos.blog.domain.Role;
 import com.cos.blog.domain.User;
 import com.cos.blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.DynamicInsert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,4 +34,27 @@ public class DummyControllerTest {
         userRepository.save(user);
         return "회원가입이 완료되었습니다";
     }
+
+    @GetMapping("/dummy/user/{id}")
+    public ResponseEntity<User> getUser(@PathVariable int id) {
+        // null이 반환될 수도 있으니 optional로 받아서 처리
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("not exist user"));
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    @GetMapping("/dummy/users")
+    public ResponseEntity<List<User>> getUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(users);
+    }
+
+    @GetMapping("/dummy/user")
+    public List<User> pageList(@PageableDefault(size = 2, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        List<User> users = userRepository.findAll(pageable).getContent();
+        return users;
+    }
+
+    // @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
+
+    // Page<User> page = userRepository.findAll(PageRequest.of(1, 10, Sort.by("id").descending()));
 }
