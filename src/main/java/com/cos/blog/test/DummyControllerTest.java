@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,5 +68,16 @@ public class DummyControllerTest {
 
         // save 호출하지 않고 더티 체킹, 영속성 컨텍스트에 의해 자동 update 쿼리 실행
         return ResponseEntity.ok().body(findUser);
+    }
+
+    @Transactional
+    @DeleteMapping("/dummy/user/{id}")
+    public ResponseEntity<Map<String,String>> deleteUser(@PathVariable int id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("not exist user"));
+        userRepository.delete(user);
+
+        Map<String,String> result = Map.of("Delete", "Success");
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }
